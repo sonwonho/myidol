@@ -1,0 +1,16 @@
+{
+    "api_key": "INPUT APIKEY",
+    "version": "v2.1",
+    "width": 1024,
+    "height": 1024,
+    "upscale": "true",
+    "scale": 2,
+    "image_format": "jpeg",
+    "image_quality": 100,
+    "samples": 1,
+    "return_type": "url",
+    "prior_num_inference_steps": 25,
+    "prior_guidance_scale": 5.0,
+    "num_inference_steps": 50,
+    "guidance_scale": 5.0
+}

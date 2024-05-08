@@ -1,0 +1,4 @@
+{
+    "prompt": ["symmetric eyes", "detail description of face", "masterpiece"],
+    "negative_prompt": ["asymmetry eyes", "ugly", "grotesque", "scary", "strange", "hanbok"]
+}
