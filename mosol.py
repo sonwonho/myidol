@@ -1,8 +1,10 @@
+import io
 from typing import Optional
 
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
+from starlette.responses import StreamingResponse
 
 from utils.karlo_api import KarloAPI
 from utils.prompt_mapper import PromptMapper
@@ -13,17 +15,17 @@ prompt_mapper = PromptMapper()
 
 
 class SelectItem(BaseModel):
-    age: Optional[str]
+    age: Optional[str] = None
     sex: str
-    mbti: Optional[str]
-    lookLike: Optional[str]
-    height: Optional[str]
+    mbti: Optional[str] = None
+    lookLike: Optional[str] = None
+    height: Optional[str] = None
     eyeShape: str
     faceShape: str
-    fashion: Optional[str]
-    hobby1: Optional[str]
-    hobby2: Optional[str]
-    hobbyList: list
+    fashion: Optional[str] = None
+    hobby1: Optional[str] = None
+    hobby2: Optional[str] = None
+    hobbyList: Optional[list] = None
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -46,15 +48,15 @@ class SelectItem(BaseModel):
 
 
 class PictureItem(BaseModel):
-    age: Optional[str]
+    age: Optional[str] = None
     sex: str
-    mbti: Optional[str]
-    lookLike: Optional[str]
-    height: Optional[str]
+    mbti: Optional[str] = None
+    lookLike: Optional[str] = None
+    height: Optional[str] = None
     eyeShape: str
     faceShape: str
-    fashion: Optional[str]
-    hobby: str
+    fashion: Optional[str] = None
+    hobby: Optional[str] = None
     picture: str
     model_config = {
         "json_schema_extra": {
@@ -78,7 +80,7 @@ class PictureItem(BaseModel):
 
 class ResultItem(BaseModel):
     code: str
-    data: Optional[PictureItem]
+    data: Optional[PictureItem] = None
     message: str
     model_config = {
         "json_schema_extra": {
@@ -104,6 +106,23 @@ class ResultItem(BaseModel):
     }
 
 
+class EssentialPrompt(BaseModel):
+    prompt: list[str]
+    negative_prompt: list[str]
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "prompt": prompt_mapper.essential_prompt["prompt"],
+                    "negative_prompt": prompt_mapper.essential_prompt[
+                        "negative_prompt"
+                    ],
+                }
+            ]
+        }
+    }
+
+
 @app.post("/make_picture", response_model=ResultItem)
 def make_image(select: SelectItem):
     prompt_data_list = [select.sex, select.eyeShape, select.faceShape]
@@ -121,5 +140,23 @@ def make_image(select: SelectItem):
     return result
 
 
+@app.post("/set_essential_prompt", response_model=EssentialPrompt)
+def set_essential_prompt(prompts: EssentialPrompt):
+    prompt_mapper.set_essential_prompt(prompts.prompt, prompts.negative_prompt)
+    return prompt_mapper.essential_prompt
+
+
+@app.post("/show_picture")
+def show_image(select: SelectItem):
+    prompt_data_list = [select.sex, select.eyeShape, select.faceShape]
+    prompt, negative_prompt = prompt_mapper.make_prompt(prompt_data_list)
+    image = karlo.get_image(prompt, negative_prompt)
+    imgio = io.BytesIO()
+    image.save(imgio, "JPEG")
+    imgio.seek(0)
+    return StreamingResponse(content=imgio, media_type="image/jpeg")
+
+
 if __name__ == "__main__":
-    uvicorn.run(app="mosol:app", host="0.0.0.0", port=5000, reload=False)
+    # uvicorn.run(app="mosol:app", host="0.0.0.0", port=5000, reload=False)
+    uvicorn.run(app="mosol:app", host="127.0.0.1", port=8000, reload=True)
