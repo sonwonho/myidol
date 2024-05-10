@@ -1,9 +1,9 @@
 {
     "api_key": "INPUT APIKEY",
     "version": "v2.1",
-    "width": 1024,
-    "height": 1024,
-    "upscale": "true",
+    "width": 768,
+    "height": 768,
+    "upscale": "false",
     "scale": 2,
     "image_format": "jpeg",
     "image_quality": 100,
