@@ -1,8 +1,10 @@
 import io
 from typing import Optional
 
+import requests
 import uvicorn
 from fastapi import FastAPI
+from PIL import Image
 from pydantic import BaseModel
 from starlette.responses import StreamingResponse
 
@@ -123,11 +125,26 @@ class EssentialPrompt(BaseModel):
     }
 
 
+def get_looklike_image(looklike):
+    image_url = "https://stonslabdata.com/code/image/looklike/" + looklike
+    response = requests.get(image_url)
+    try:
+        image = Image.open(io.BytesIO(response.content))
+    except Exception as e:
+        print(e)
+        return
+    return image
+
+
 @app.post("/make_picture", response_model=ResultItem)
 def make_image(select: SelectItem):
     prompt_data_list = [select.sex, select.eyeShape, select.faceShape]
     prompt, negative_prompt = prompt_mapper.make_prompt(prompt_data_list)
-    image_url = karlo.get_image_url(prompt, negative_prompt)
+    image = get_looklike_image(select.lookLike)
+    if image:
+        image_url = karlo.modfiy_image(prompt, negative_prompt, image)
+    else:
+        image_url = karlo.get_image_url(prompt, negative_prompt)
     select_dict = select.model_dump()
     select_dict.pop("hobby1", None)
     select_dict.pop("hobby2", None)
@@ -150,7 +167,8 @@ def set_essential_prompt(prompts: EssentialPrompt):
 def show_image(select: SelectItem):
     prompt_data_list = [select.sex, select.eyeShape, select.faceShape]
     prompt, negative_prompt = prompt_mapper.make_prompt(prompt_data_list)
-    image = karlo.get_image(prompt, negative_prompt)
+    image = get_looklike_image(select.lookLike)
+    image = karlo.get_image(prompt, negative_prompt, image)
     imgio = io.BytesIO()
     image.save(imgio, "JPEG")
     imgio.seek(0)
