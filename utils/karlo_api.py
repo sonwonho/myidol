@@ -17,9 +17,6 @@ def imageToString(img):
     return my_encoded_img
 
 
-MASK = Image.open("mask.png")
-
-
 class KarloAPI:
     def __init__(self) -> None:
         self.config = self._get_config()
