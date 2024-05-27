@@ -126,7 +126,7 @@ class EssentialPrompt(BaseModel):
 
 
 def get_looklike_image(looklike):
-    image_url = "https://stonslabdata.com/code/image/looklike/" + looklike
+    image_url = "http://192.168.219.106:8080/code/image/looklike/" + looklike
     response = requests.get(image_url)
     try:
         image = Image.open(io.BytesIO(response.content))
@@ -176,5 +176,5 @@ def show_image(select: SelectItem):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app="mosol:app", host="0.0.0.0", port=5000, reload=False)
-    # uvicorn.run(app="mosol:app", host="127.0.0.1", port=8000, reload=True)
+    # uvicorn.run(app="mosol:app", host="0.0.0.0", port=5000, reload=False)
+    uvicorn.run(app="mosol:app", host="127.0.0.1", port=8000, reload=True)
